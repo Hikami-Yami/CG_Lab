@@ -7,8 +7,7 @@ if __name__ == '__main__':
 
     canvas = Canvas(1000,1000)
     m = Model('model.obj')
-
-    canvas.render_wireframe(m)
+    canvas.render_model(m)
     canvas.save('image.png')
 
     end = time.process_time()
