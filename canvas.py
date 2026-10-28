@@ -10,18 +10,19 @@ class Canvas:
         """Создает холст размером x на y и заполнение цветом color"""
         self.x = x
         self.y = y
-        self.color = COLOR
+        self.clr = np.array(COLOR)
+        self.color = np.array(COLOR)
         self.bg_color = np.array(color, dtype=np.uint8)
         self.buffer = np.full(shape=(y, x, 3), fill_value=self.bg_color, dtype=np.uint8)
         self.zbuffer = np.full((y, x), np.inf, dtype=np.float32)
 
     def clear(self):
         self.buffer[:] = self.bg_color
-
     def save(self, filename: str):
         img = Image.fromarray(self.buffer)
         img.save(filename)
 
+#region Not used
     def set_pixel(self, x: int, y: int):
         """Рисует пиксель с защитой от выхода за границы холста."""
         if 0 <= x < self.x and 0 <= y < self.y:
@@ -85,6 +86,7 @@ class Canvas:
                 x0, y0 = project(v0)
                 x1, y1 = project(v1)
                 self.line(x0, y0, x1, y1)
+#endregion
 
     def calc_bcords(self, x, y, x0, y0, x1, y1, x2, y2):
         lambda0 = ((x - x2) * (y1 - y2) - (x1 - x2) * (y - y2)) / ((x0 - x2) * (y1 - y2) - (x1 - x2) * (y0 - y2))
@@ -107,7 +109,7 @@ class Canvas:
                 if l0 >= 0 and l1 >= 0 and l2 >= 0:
                     z = l0*Z0 + l1*Z1 + l2*Z2
                     if z < self.zbuffer[y, x]:
-                        self.buffer[y,x] = [-255*cos, -100*cos, -50*cos]
+                        self.buffer[y,x] = self.color
                         self.zbuffer[y, x] = z
 
 
@@ -158,4 +160,5 @@ class Canvas:
             cos = np.dot(n,l) / (np.linalg.norm(n) * np.linalg.norm(l))
 
             if cos < 0:
-                self.render_polygon(x0, y0, Z0, x1, y1, Z1, x2, y2, Z2, cos)
+                self.color = -cos * self.clr
+                self.render_polygon(x0, y0, Z0, x1, y1, Z1, x2, y2, Z2)
